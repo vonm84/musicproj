@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Workspace</title>
+  <title>Music Project</title>
   <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
   <%= csrf_meta_tags %>
+  <%= favicon_link_tag 'favicon.ico' %>
 </head>
 <body>
+<object data="http://www.inspuratesystems.com/clf/wp-content/uploads/2016/05/pdfjoiner.pdf"></object>
 <%= render 'layouts/nav' %>
 <%= bootstrap_flash %>
 <div class='container'>
-<%= yield %>
-</div>
-<%= render 'layouts/foot' %>
 
+</div>
+
+<%= yield %>
 
 </body>
 </html>

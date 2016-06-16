@@ -1,0 +1,5 @@
+<%= bootstrap_flash %>
+<div class='container'>
+<%= yield %>
+</div>
+<%= render 'layouts/foot' %>

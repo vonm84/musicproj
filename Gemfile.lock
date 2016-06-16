@@ -58,6 +58,8 @@ GEM
     coffee-script-source (1.10.0)
     concurrent-ruby (1.0.1)
     debug_inspector (0.0.2)
+    dejavu (0.3.1)
+      rails (>= 3.0)
     devise (4.1.1)
       bcrypt (~> 3.0)
       orm_adapter (~> 0.1)
@@ -177,6 +179,7 @@ DEPENDENCIES
   bootstrap-sass-extras (~> 0.0.2)
   byebug
   coffee-rails (~> 4.1.0)
+  dejavu (~> 0.3.1)
   devise (~> 4.1, >= 4.1.1)
   font-awesome-sass (~> 4.6, >= 4.6.2)
   jbuilder (~> 2.0)
