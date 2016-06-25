@@ -31,6 +31,8 @@ gem 'simple_form', '~> 3.2', '>= 3.2.1'
 
 gem 'dejavu', '~> 0.3.1'
 
+gem 'wicked'
+
 #my change
 
 group :development, :test do
