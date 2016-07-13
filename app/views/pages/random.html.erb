@@ -20,7 +20,7 @@
     if File.exists?("app/assets/images/outputfile.png")
         File.delete( "app/assets/images/outputfile.png")
     end
-    system( "lilypond --png -o app/assets/images outputfile.ly" ) %>
+    Kernel.system( "lilypond --png -o app/assets/images outputfile.ly" ) %>
     <li><%= image_tag 'outputfile.png' %></li>
 <%# end %>
 
