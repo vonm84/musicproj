@@ -1,7 +1,7 @@
 <h1>Harmony test</h1>
+<li><%= Random.rand(100) %> </li>
 
-
-<% if current_user %>
+<%# if current_user %>
   <%  if File.exists?("outputfile.ly")
         File.delete( "outputfile.ly")
     end
@@ -19,7 +19,8 @@
     output.close 
     %>
     <% system( "lilypond --png -o app/assets/images ./outputfile.ly" ) %>
-    <%= image_tag 'outputfile.png' %>
-<% end %>
+    <li><%= image_tag 'outputfile.png' %></li>
+<%# end %>
+
 <%# Random.rand(100) %>
 
