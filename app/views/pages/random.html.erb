@@ -1,4 +1,12 @@
 <h1>Random number</h1>
-
-<%= Random.rand(100) %>
+<% File.delete( "outputfile.txt") %>
+<% $output = File.open( "outputfile.txt","w") %>
+<% $output << "lily test" %>
+<% $output << Random.rand(100) %>
+<% $output.close %>
+<% $output = File.open( "outputfile.txt","r") %>
+<%= $output %>
+<% $output.close %>
+<%= system( "lilypond ./testmain.ly" ) %>
+<%# Random.rand(100) %>
 
