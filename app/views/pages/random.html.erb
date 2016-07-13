@@ -5,18 +5,18 @@
   <%  if File.exists?("outputfile.ly")
         File.delete( "outputfile.ly")
     end
-    output = File.open( "outputfile.ly","w")
+    $output = File.open( "outputfile.ly","w")
     #$output << "{  c' e' g' e'}"
-    randval = Random.rand(3)
+    $randval = Random.rand(3)
     
-    if randval == 1 
-        output << "{  c' g'}"
-    elsif randval == 2
-        output << "{  c' e'}"
+    if $randval == 1 
+        $output << "{  c' g'}"
+    elsif $randval == 2
+        $output << "{  c' e'}"
     else
-        output << "{  e' g'}"
+        $output << "{  e' g'}"
     end
-    output.close 
+    $output.close 
     if File.exists?("app/assets/images/outputfile.png")
         File.delete( "app/assets/images/outputfile.png")
     end
