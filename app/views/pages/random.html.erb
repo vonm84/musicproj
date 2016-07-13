@@ -1,12 +1,21 @@
-<h1>Random number</h1>
-<% File.delete( "outputfile.txt") %>
-<% $output = File.open( "outputfile.txt","w") %>
-<% $output << "lily test" %>
-<% $output << Random.rand(100) %>
-<% $output.close %>
-<% $output = File.open( "outputfile.txt","r") %>
-<%= $output %>
-<% $output.close %>
-<%= system( "lilypond ./testmain.ly" ) %>
+<h1>Harmony test</h1>
+
+<% if File.exists?("outputfile.ly")
+    File.delete( "outputfile.ly")
+end
+$output = File.open( "outputfile.ly","w")
+#$output << "{  c' e' g' e'}"
+randval = Random.rand(3)
+
+if randval == 1 
+    $output << "{  c' g'}"
+elsif randval == 2
+    $output << "{  c' e'}"
+else
+    $output << "{  e' g'}"
+end
+$output.close %>
+<%= system( "lilypond --png -o app/assets/images ./outputfile.ly" ) %>
+<%= image_tag 'outputfile.png' %>
 <%# Random.rand(100) %>
 
