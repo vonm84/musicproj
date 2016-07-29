@@ -6,19 +6,19 @@
     end
     output = File.open( "outputfile.ly","w")
     
-   ary = ["<c' g'>8", "<d' a'>", "<c'e'>","<d'g'>","<d'a'>","<d'a'>","<c'e'>","<d'a'>","<c'g'>","<d'g'>","<e'a'>","<e'a'>"]
-   ary2 = [["c'8" "g'8"], ["d'","a'"], ["c'","e'"]]
+
+   ary = [["c'8", "g'8"], ["d'","a'"], ["c'","e'"],["d'","g'"],["d'","a'"],["d'","a'"],
+           ["c'","e'"], ["d'","a'"], ["c'","g'"], ["d'","g'"],["e'","a'"],["e'","a'"]
+           ]
    
     output << "{ \\time 6/8 "
-    #ary2.each do |elem|
     ary.each do |elem|
         if Random.rand(2) == 0
-            output << elem
-            #if Random.rand(2) ==0
-            #    output << elem[0]
-            #else
-            #    output << elem[1]
-            #end
+            if Random.rand(2) ==0
+                output << elem[0]
+            else
+                output << elem[1]
+            end
         else 
             output << "r8"
         end
