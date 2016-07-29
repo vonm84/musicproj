@@ -1,1 +1,1 @@
-{ \time 6/8 <c' g'>8<d' a'><c'e'>r8<d'a'><d'a'>r8r8<c'g'>r8<e'a'><e'a'>}
+{ \time 6/8 <c' g'>8r8r8r8<d'a'>r8r8<d'a'><c'g'><d'g'>r8<e'a'>}
