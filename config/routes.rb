@@ -3,13 +3,15 @@ Rails.application.routes.draw do
   devise_for :users, :controllers => { registrations: 'registrations' }
   resources :articles
   root to: 'pages#index'
+  
   get 'pages/index'
 
   get 'pages/contact'
 
   get 'pages/about'
   
-  get 'pages/random'
+  get 'pages/result'
+  
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
