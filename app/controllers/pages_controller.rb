@@ -1,6 +1,6 @@
 class PagesController < ApplicationController
   def index
-    @articles = Article.all
+        @my_instance_variable = MyFormObject.new
   end
 
   def contact
