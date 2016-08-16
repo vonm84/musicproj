@@ -4,13 +4,14 @@ Rails.application.routes.draw do
   resources :articles
   root to: 'pages#index'
   
+  
   get 'pages/index'
 
   get 'pages/contact'
 
   get 'pages/about'
   
-  get 'pages/result'
+  post 'pages/result'
   
 
   # The priority is based upon order of creation: first created -> highest priority.

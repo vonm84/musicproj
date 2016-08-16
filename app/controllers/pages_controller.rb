@@ -1,15 +1,18 @@
 class PagesController < ApplicationController
   def index
-        @my_instance_variable = MyFormObject.new
+      # session[:numnotes] = 14
   end
 
   def contact
   end
 
+  
+
   def about
   end
   
   def result
+     @numn=params[:session][:numnotes]
     if File.exists?("outputfile.ly")
       File.delete( "outputfile.ly")
     end
@@ -39,4 +42,6 @@ class PagesController < ApplicationController
     end
     Kernel.system( "lilypond --png -o app/assets/images outputfile.ly" )
   end
+  
+
 end
