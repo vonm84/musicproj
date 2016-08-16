@@ -1,1 +1,1 @@
-{ \time 6/8 r8r8c'r8r8r8e'a'r8r8r8r8}
+{ \time 6/8 g'8a'c'r8a'a'r8a'c'r8r8r8}

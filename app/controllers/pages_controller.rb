@@ -1,6 +1,6 @@
 class PagesController < ApplicationController
   def index
-      # session[:numnotes] = 14
+
   end
 
   def contact
@@ -12,7 +12,8 @@ class PagesController < ApplicationController
   end
   
   def result
-     @numn=params[:session][:numnotes]
+    @numn=params[:session][:numnotes].to_i
+     
     if File.exists?("outputfile.ly")
       File.delete( "outputfile.ly")
     end
@@ -21,19 +22,41 @@ class PagesController < ApplicationController
     ary = [["c'8", "g'8"], ["d'","a'"], ["c'","e'"],["d'","g'"],["d'","a'"],["d'","a'"],
            ["c'","e'"], ["d'","a'"], ["c'","g'"], ["d'","g'"],["e'","a'"],["e'","a'"]
            ]
+           
+    aryrand = Array.new(11, 0)
+    for i in 0..@numn-1
+        aryrand[i]=1
+    end
+    
+    aryrand = aryrand.shuffle
+    
+    
    
     output << "{ \\time 6/8 "
-    ary.each do |elem|
-        if Random.rand(2) == 0
+#    ary.each do |elem|
+#        if Random.rand(2) == 0
+#            if Random.rand(2) ==0
+#                output << elem[0]
+#            else
+#                output << elem[1]
+#            end
+#        else 
+#            output << "r8"
+#        end
+#    end
+   
+    for i in 0..11
+        if aryrand[i]==1
             if Random.rand(2) ==0
-                output << elem[0]
+                output << ary[i][0]
             else
-                output << elem[1]
-            end
-        else 
+                output << ary[i][1]
+            end    
+        else
             output << "r8"
         end
     end
+   
    
     output << "}"
     output.close 
