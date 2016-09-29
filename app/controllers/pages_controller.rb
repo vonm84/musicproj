@@ -14,7 +14,7 @@ class PagesController < ApplicationController
   end
   
   def result
-        @newmidiseq=Midiseq.new
+        @newmidiseq=Midiseq.new(params[:session][:numcycles].to_i)
         send_file 'app/assets/data/tonebank_example_'+@newmidiseq.instance_variable_get("@datetime")+'.mid'
     
   end
@@ -22,7 +22,7 @@ class PagesController < ApplicationController
   def resultold
  
     
-    @numn=params[:session][:numnotes].to_i
+    @numn=params[:session][:numbars].to_i
      
     if File.exists?("outputfile.ly")
       #File.delete( "outputfile.ly")
