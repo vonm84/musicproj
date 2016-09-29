@@ -1,1 +1,4 @@
-{ \time 6/8 g'8a'c'r8a'a'r8a'c'r8r8r8}
+\paper {
+  #(set-paper-size "a6")
+    }
+    { \time 6/8 r8a'c'r8a'r8r8d'r8g'r8r8}

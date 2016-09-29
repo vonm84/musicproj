@@ -1,8 +1,8 @@
 <!-- h1>Index </h1> --!>
 
 <%= form_for :session, url: pages_result_path, :html => { :method => 'POST' } do |f| %>
-  <%= f.label 'Number of Notes:' %>
-  <%= f.number_field(:numnotes, in: 1..12) %>
-  <% #= f.text_field :numnotes %>
-  <%= f.submit "Submit" %>                                                                  
+  <%#= f.label 'Number of Notes:' %>
+  <%#= f.number_field(:numnotes, in: 1..12) %>
+  <%#= f.text_field :numnotes %>
+  <%= f.submit "Generate" %>                                                                  
 <% end %>
