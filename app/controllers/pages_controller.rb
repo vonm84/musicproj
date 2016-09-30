@@ -14,7 +14,7 @@ class PagesController < ApplicationController
   end
   
   def result
-        @newmidiseq=Midiseq.new(params[:session][:numcycles].to_i)
+        @newmidiseq=Midiseq.new(params[:session][:numcycles].to_i,params[:session][:bpm].to_i)
         send_file 'app/assets/data/tonebank_example_'+@newmidiseq.instance_variable_get("@datetime")+'.mid'
     
   end
