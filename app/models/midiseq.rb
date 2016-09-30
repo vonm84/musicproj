@@ -116,7 +116,7 @@ class Midiseq
         @phrrest=Random.rand(2)+2
         wd.split("").each do |h|
           @hupdown=Random.rand(2)
-          puts h
+          #puts h
           if h=="1" then
             track.events << NoteOn.new(0, 60+tonebank[@melodycount.modulo(tonebank.length)][@hupdown], 100, 0) 
             track.events << NoteOff.new(0, 60+tonebank[@melodycount.modulo(tonebank.length)][@hupdown], 100, eighth_note_length)
@@ -127,11 +127,11 @@ class Midiseq
             @melodycount+=2 
           end
         end
-        puts "-wd- #{@melodycount} #{@melodycount.modulo(tonebank.length)} [#{tonebank[@melodycount.modulo(tonebank.length)][0]},#{tonebank[@melodycount.modulo(tonebank.length)][1]}]"
+        #puts "-wd- #{@melodycount} #{@melodycount.modulo(tonebank.length)} [#{tonebank[@melodycount.modulo(tonebank.length)][0]},#{tonebank[@melodycount.modulo(tonebank.length)][1]}]"
         track.events << NoteOff.new(0, 60+tonebank[(@melodycount).modulo(tonebank.length)][0], 127, eighth_note_length)
         @melodycount+=1
       end
-      puts "-phr-"
+      #puts "-phr-"
       track.events << NoteOff.new(0, 72, 127, @phrrest*eighth_note_length)
       @melodycount +=@phrrest
       #track.events << NoteOn.new(0, 60+g.to_i, 127, 0) 
