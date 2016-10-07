@@ -3,6 +3,8 @@ require 'midilib/consts'
 include MIDI
   
 class Midiseq
+  @@tonebank=[[0,7],[2,9],[0,4],[2,7],[2,9],[2,9],[0,4],[2,9],[0,7],[2,7],[4,9],[4,9]]
+  
   def weighted_rand(weights = {})
     #raise 'Probabilities must sum up to 1' unless weights.values.inject(&:+) == 1.0
   
@@ -34,11 +36,16 @@ class Midiseq
   
   def phraselength(testphrase)
     testphrase.map{ |k| "#{k}" }.join("1").split("").map {|s| s.to_i }.inject(:+)
-  end 
+  end
+  
+  def nextpitch(melcount, prevpitch)
+    hupdown=Random.rand(2)
+    60+@@tonebank[melcount.modulo(@@tonebank.length)][hupdown]
+  end
   
   def initialize(numcycles, bpms)
 
-    tonebank=[[0,7],[2,9],[0,4],[2,7],[2,9],[2,9],[0,4],[2,9],[0,7],[2,7],[4,9],[4,9]]
+
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = Array.new
     @melodylength = 0
@@ -51,7 +58,7 @@ class Midiseq
       currentphrase = self.phrase
       @melodylength += phraselength(currentphrase)
       @melodylength += 3
-      break if @melodylength >= tonebank.length*numcycles
+      break if @melodylength >= @@tonebank.length*numcycles
       @melody.push(currentphrase)
 
     end
@@ -91,11 +98,10 @@ class Midiseq
     
     
     eighth_note_length = seq.note_to_delta('eighth')
-    quarter_note_length = seq.note_to_delta('quarter')
     
 
     numcycles.times do
-      tonebank.each do |f|
+      @@tonebank.each do |f|
         track.events << NoteOn.new(0, 60+f[0], 80, 0) << NoteOn.new(0, 60+f[1], 80, 0)
         track.events << NoteOff.new(0, 60+f[0], 80, eighth_note_length) << NoteOff.new(0, 60+f[1], 80, 0)
       end
@@ -109,37 +115,35 @@ class Midiseq
     track.events << ProgramChange.new(0, 40, 0)
     #track.events << Controller.new(0, CC_VOLUME, 127)
     
-    @melodycount = 0
+    melodycount = 0
+    previouspitch = 0
     
     @melody.each do |phr|
       phr.each do |wd|
         @phrrest=Random.rand(2)+2
         wd.split("").each do |h|
-          @hupdown=Random.rand(2)
-          #puts h
-          if h=="1" then
-            track.events << NoteOn.new(0, 60+tonebank[@melodycount.modulo(tonebank.length)][@hupdown], 100, 0) 
-            track.events << NoteOff.new(0, 60+tonebank[@melodycount.modulo(tonebank.length)][@hupdown], 100, eighth_note_length)
-            @melodycount+=1 
-          elsif h=="2" then
-            track.events << NoteOn.new(0, 60+tonebank[@melodycount.modulo(tonebank.length)][@hupdown], 100, 0) 
-            track.events << NoteOff.new(0, 60+tonebank[@melodycount.modulo(tonebank.length)][@hupdown], 100, quarter_note_length)
-            @melodycount+=2 
-          end
+          @nextp=self.nextpitch(melodycount,0)
+          track.events << NoteOn.new(0, @nextp, 100, 0) 
+          track.events << NoteOff.new(0, @nextp, 100, h.to_i*eighth_note_length)
+          melodycount+=h.to_i 
+          
+
         end
-        #puts "-wd- #{@melodycount} #{@melodycount.modulo(tonebank.length)} [#{tonebank[@melodycount.modulo(tonebank.length)][0]},#{tonebank[@melodycount.modulo(tonebank.length)][1]}]"
-        track.events << NoteOff.new(0, 60+tonebank[(@melodycount).modulo(tonebank.length)][0], 127, eighth_note_length)
-        @melodycount+=1
+        track.events << NoteOff.new(0, @nextp, 127, eighth_note_length)
+        melodycount+=1
+        #puts "-wd-"
+        #puts "-wd- #{@melodycount} #{@melodycount.modulo(@@tonebank.length)} [#{@@tonebank[@melodycount.modulo(@@tonebank.length)][0]},#{@@tonebank[@melodycount.modulo(@@tonebank.length)][1]}]"
+
       end
       #puts "-phr-"
       track.events << NoteOff.new(0, 72, 127, @phrrest*eighth_note_length)
-      @melodycount +=@phrrest
+      melodycount +=@phrrest
       #track.events << NoteOn.new(0, 60+g.to_i, 127, 0) 
       #track.events << NoteOff.new(0, 60+g.to_i, 127, eighth_note_length)
     end
 
     #numcycles.times do
-    #  tonebank.each do |f|
+    #  @@tonebank.each do |f|
     #    track.events << NoteOn.new(0, 60+f[0], 127, 0) << NoteOn.new(0, 60+f[1], 127, 0)
     #    track.events << NoteOff.new(0, 60+f[0], 127, eighth_note_length) << NoteOff.new(0, 60+f[1], 127, 0)
     #  end
