@@ -4,21 +4,33 @@ include MIDI
   
 class Midiseq
   @@tonebank=[[0,7],[2,9],[0,4],[2,7],[2,9],[2,9],[0,4],[2,9],[0,7],[2,7],[4,9],[4,9]]
-  @@rangebottom=55
-  @@rangetop=79
-  @@intervalspan=7
+  @@rangebottom=0
+  @@rangetop=0
+  @@maxintervalspan=0
   
-  def binom(n,k)
-    (1+n-k..n).inject(:*)/(1..k).inject(:*) 
+  def nested_arrays_of_pairs_to_hash(array)
+  result = {}
+  array.each do |elem|
+    second = if elem.last.is_a?(Array)
+      nested_arrays_to_hash(elem.last)
+    else
+      elem.last
+    end
+    result.merge!({elem.first => second})
+  end
+  result
   end
   
-  def binomarray(m)
-    n=2*m-1
+  def binomarray(m, centre)
+    n=2*m-2
     ary = Array.new(n+1)
-    ary.each_with_index {|val, k |val=  if k == 0 then 1 else (1+n-k..n).inject(:*)/(1..k).inject(:*) end; puts "[#{k},#{val}]"}
+    for k in 0..ary.size-1
+      ary[k]= if k == 0 then [k+centre-@@maxintervalspan+1,1] else [k+centre-@@maxintervalspan+1,(1+n-k..n).inject(:*)/(1..k).inject(:*)] end
+    end
+    nested_arrays_of_pairs_to_hash ary
   end
   
-  def weighted_rand(weights = {})
+  def weighted_rand(weights)
     #raise 'Probabilities must sum up to 1' unless weights.values.inject(&:+) == 1.0
   
     u = 0.0
@@ -44,6 +56,7 @@ class Midiseq
       phraseweights = {1=>0.016, 2=> 0.094, 3=> 0.23, 4=>0.31, 5=> 0.23, 6=>
   0.094, 7=> 0.016}
     Array.new(weighted_rand phraseweights) {self.word}
+    
   end
   
   def phraselength(testphrase)
@@ -52,18 +65,47 @@ class Midiseq
   
   def nextpitch(melcount, prevpitch)
     tonebankopt=@@tonebank[melcount.modulo(@@tonebank.length)]
-    hupdown=Random.rand(2)
-    60+tonebankopt[hupdown]
-  end
+    nextpitchspan=binomarray(@@maxintervalspan,prevpitch)
+    #print prevpitch
+    optall=[]
+    opt={}
+    
+    for i in @@rangebottom..@@rangetop
+      tonebankopt.each do |tb|
+        if i.modulo(@@tonebank.length)==tb.modulo(@@tonebank.length) then optall.push i end
+      end
+    end
+    #hupdown=Random.rand(2)
   
-  def initialize(numcycles, bpms)
+    optall.each do |optsing|
+          @ps = nextpitchspan.select {|k,v| k==optsing}
+          if @ps != {} then opt.merge! @ps end
+    end
+
+    opttotal = opt.values.reduce(:+)
+
+    opt.each {|key,value| opt[key]=opt[key]/opttotal.to_f}
+    #print opt
+    
+    #print " || "
+    weighted_rand opt
+    #optall.sample
+    
+  end
+
+  def initialize(numcycles, bpms, span, bottom, top)
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = Array.new
     @melodylength = 0
-    
-    
-    puts binomarray(5).join(",")
+ 
+    @@maxintervalspan=span
+    @@rangebottom=bottom
+    @@rangetop = top
+    #print binomarray(@@maxintervalspan,60)
+    puts @@maxintervalspan
+    puts @@rangebottom
+    puts @@rangetop
     #currentphrase = self.phrase
     #puts phraselength(currentphrase)
     #puts currentphrase
@@ -130,7 +172,7 @@ class Midiseq
     #track.events << Controller.new(0, CC_VOLUME, 127)
     
     melodycount = 0
-    previouspitch = 0
+    previouspitch = 60+@@tonebank[0][0]
     
     @melody.each do |phr|
       phr.each do |wd|

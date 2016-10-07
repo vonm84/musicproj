@@ -5,7 +5,19 @@
   <%= f.number_field(:numcycles, in: 4..256, :value =>16) %></p>
   <p><%= f.label "BPM:" %>
   <%= f.number_field(:bpm, in: 1..255,:value =>120) %></p>
+  <p> <%= f.label "Maximum leap size (use higher values for increased probabilities of larger leaps):" %>
+  <%= f.number_field(:span, in: 7..100,:value =>12) %></p>
   <%#= f.text_field :numnotes %>
+ 
+  <b> Solo instrument range (mid C = 60):</b>
+  
+
+  <p><%= f.label "bottom:" %>
+  <%= f.number_field(:bottom, in: 1..255,:value =>55) %>
+  <%= f.label "top:" %>
+  <%= f.number_field(:top, in: 1..255,:value =>79) %></p>
+  <b>
+
   <p><%= f.submit "Generate" %></p>                                                                  
 <% end %>
 </div>
