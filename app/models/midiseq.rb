@@ -4,6 +4,19 @@ include MIDI
   
 class Midiseq
   @@tonebank=[[0,7],[2,9],[0,4],[2,7],[2,9],[2,9],[0,4],[2,9],[0,7],[2,7],[4,9],[4,9]]
+  @@rangebottom=55
+  @@rangetop=79
+  @@intervalspan=7
+  
+  def binom(n,k)
+    (1+n-k..n).inject(:*)/(1..k).inject(:*) 
+  end
+  
+  def binomarray(m)
+    n=2*m-1
+    ary = Array.new(n+1)
+    ary.each_with_index {|val, k |val=  if k == 0 then 1 else (1+n-k..n).inject(:*)/(1..k).inject(:*) end; puts "[#{k},#{val}]"}
+  end
   
   def weighted_rand(weights = {})
     #raise 'Probabilities must sum up to 1' unless weights.values.inject(&:+) == 1.0
@@ -16,7 +29,7 @@ class Midiseq
   end
   
   def word
-    weights = {'2'=> 0.11782, '12'=> 0.058502, '21'=> 0.26833, '22'=> 
+    wordweights = {'2'=> 0.11782, '12'=> 0.058502, '21'=> 0.26833, '22'=> 
   0.012812, '121'=> 0.11135, '211'=> 0.14486, '212'=> 
   0.022996, '221'=> 0.014323, '1211'=> 0.073127, '2111'=> 
   0.030520, '2121'=> 0.064848, '2211'=> 0.0035959, '12111'=> 
@@ -24,14 +37,13 @@ class Midiseq
   0.0099115, '21211'=> 0.030248, '121211'=> 0.0039283, '211211'=> 
   0.0035657, '212111'=> 0.0030218}
   
-
-     weighted_rand weights
+    weighted_rand wordweights
   end
   
   def phrase
-      weightsbinom = {1=>0.016, 2=> 0.094, 3=> 0.23, 4=>0.31, 5=> 0.23, 6=>
+      phraseweights = {1=>0.016, 2=> 0.094, 3=> 0.23, 4=>0.31, 5=> 0.23, 6=>
   0.094, 7=> 0.016}
-    Array.new(weighted_rand weightsbinom) {self.word}
+    Array.new(weighted_rand phraseweights) {self.word}
   end
   
   def phraselength(testphrase)
@@ -39,17 +51,19 @@ class Midiseq
   end
   
   def nextpitch(melcount, prevpitch)
+    tonebankopt=@@tonebank[melcount.modulo(@@tonebank.length)]
     hupdown=Random.rand(2)
-    60+@@tonebank[melcount.modulo(@@tonebank.length)][hupdown]
+    60+tonebankopt[hupdown]
   end
   
   def initialize(numcycles, bpms)
-
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = Array.new
     @melodylength = 0
     
+    
+    puts binomarray(5).join(",")
     #currentphrase = self.phrase
     #puts phraselength(currentphrase)
     #puts currentphrase
@@ -122,9 +136,11 @@ class Midiseq
       phr.each do |wd|
         @phrrest=Random.rand(2)+2
         wd.split("").each do |h|
-          @nextp=self.nextpitch(melodycount,0)
+          @nextp=self.nextpitch(melodycount,previouspitch)
+          #puts "[#{previouspitch}, #{@nextp}]"
           track.events << NoteOn.new(0, @nextp, 100, 0) 
           track.events << NoteOff.new(0, @nextp, 100, h.to_i*eighth_note_length)
+          previouspitch=@nextp
           melodycount+=h.to_i 
           
 
