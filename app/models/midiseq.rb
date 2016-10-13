@@ -4,9 +4,18 @@ include MIDI
   
 class Midiseq
   @@tonebank=[[0,7],[2,9],[0,4],[2,7],[2,9],[2,9],[0,4],[2,9],[0,7],[2,7],[4,9],[4,9]]
+  @@wordweights= {'2'=> 0.11782, '12'=> 0.058502, '21'=> 0.26833, '22'=> 
+  0.012812, '121'=> 0.11135, '211'=> 0.14486, '212'=> 
+  0.022996, '221'=> 0.014323, '1211'=> 0.073127, '2111'=> 
+  0.030520, '2121'=> 0.064848, '2211'=> 0.0035959, '12111'=> 
+  0.014323, '12121'=> 0.0084912, '21111'=> 0.0034146, '21121'=> 
+  0.0099115, '21211'=> 0.030248, '121211'=> 0.0039283, '211211'=> 
+  0.0035657, '212111'=> 0.0030218}
+  @@phraseweights = {1=>0.016, 2=> 0.094, 3=> 0.23, 4=>0.31, 5=> 0.23, 6=> 0.094, 7=> 0.016}
   @@rangebottom=0
   @@rangetop=0
   @@maxintervalspan=0
+  @@swingarr=[3,2,2,3]
   
   def nested_arrays_of_pairs_to_hash(array)
   result = {}
@@ -19,6 +28,14 @@ class Midiseq
     result.merge!({elem.first => second})
   end
   result
+  end
+  
+  def swingtotal(start,stop,arr)
+    total=0
+    for i in start..stop
+      total+=arr[i%4]
+    end
+    total
   end
   
   def binomarray(m, centre)
@@ -40,22 +57,10 @@ class Midiseq
     ranges.find{ |p, _| p > u }.last
   end
   
-  def word
-    wordweights = {'2'=> 0.11782, '12'=> 0.058502, '21'=> 0.26833, '22'=> 
-  0.012812, '121'=> 0.11135, '211'=> 0.14486, '212'=> 
-  0.022996, '221'=> 0.014323, '1211'=> 0.073127, '2111'=> 
-  0.030520, '2121'=> 0.064848, '2211'=> 0.0035959, '12111'=> 
-  0.014323, '12121'=> 0.0084912, '21111'=> 0.0034146, '21121'=> 
-  0.0099115, '21211'=> 0.030248, '121211'=> 0.0039283, '211211'=> 
-  0.0035657, '212111'=> 0.0030218}
-  
-    weighted_rand wordweights
-  end
   
   def phrase
-      phraseweights = {1=>0.016, 2=> 0.094, 3=> 0.23, 4=>0.31, 5=> 0.23, 6=>
-  0.094, 7=> 0.016}
-    Array.new(weighted_rand phraseweights) {self.word}
+      
+    Array.new(weighted_rand @@phraseweights) {weighted_rand @@wordweights}
     
   end
   
@@ -103,9 +108,9 @@ class Midiseq
     @@rangebottom=bottom
     @@rangetop = top
     #print binomarray(@@maxintervalspan,60)
-    puts @@maxintervalspan
-    puts @@rangebottom
-    puts @@rangetop
+    #puts @@maxintervalspan
+    #puts @@rangebottom
+    #puts @@rangetop
     #currentphrase = self.phrase
     #puts phraselength(currentphrase)
     #puts currentphrase
@@ -120,16 +125,7 @@ class Midiseq
     end
 
     
-    #! /usr/bin/env ruby
-    #
-    # usage: from_scratch.rb
-    #
-    # This script shows you how to create a new sequence from scratch and save it
-    # to a MIDI file. It creates a file called 'from_scratch.mid'.
-    
-    # Start looking for MIDI module classes in the directory above this one.
-    # This forces us to use the local copy, even if there is a previously
-    # installed version out there somewhere.
+
     $LOAD_PATH[0, 0] = File.join(File.dirname(__FILE__), '..', 'lib')
     
 
@@ -155,11 +151,21 @@ class Midiseq
     
     eighth_note_length = seq.note_to_delta('eighth')
     
+    swinglengths=[]
+    
+    for i in 0..3 do
+      swinglengths[i]=4 * eighth_note_length * @@swingarr[i]/@@swingarr.inject(:+)
+    end
+    
+    print swinglengths
+  
+    melodycount = 0
 
     numcycles.times do
       @@tonebank.each do |f|
         track.events << NoteOn.new(0, 60+f[0], 80, 0) << NoteOn.new(0, 60+f[1], 80, 0)
-        track.events << NoteOff.new(0, 60+f[0], 80, eighth_note_length) << NoteOff.new(0, 60+f[1], 80, 0)
+        track.events << NoteOff.new(0, 60+f[0], 80, swinglengths[melodycount % 4]) << NoteOff.new(0, 60+f[1], 80, 0)
+        melodycount +=1
       end
     end
     
@@ -181,20 +187,20 @@ class Midiseq
           @nextp=self.nextpitch(melodycount,previouspitch)
           #puts "[#{previouspitch}, #{@nextp}]"
           track.events << NoteOn.new(0, @nextp, 100, 0) 
-          track.events << NoteOff.new(0, @nextp, 100, h.to_i*eighth_note_length)
+          track.events << NoteOff.new(0, @nextp, 100, swingtotal(melodycount,melodycount+h.to_i-1,swinglengths))
           previouspitch=@nextp
           melodycount+=h.to_i 
           
 
         end
-        track.events << NoteOff.new(0, @nextp, 127, eighth_note_length)
+        track.events << NoteOff.new(0, @nextp, 127, swinglengths[melodycount % 4])
         melodycount+=1
         #puts "-wd-"
         #puts "-wd- #{@melodycount} #{@melodycount.modulo(@@tonebank.length)} [#{@@tonebank[@melodycount.modulo(@@tonebank.length)][0]},#{@@tonebank[@melodycount.modulo(@@tonebank.length)][1]}]"
 
       end
       #puts "-phr-"
-      track.events << NoteOff.new(0, 72, 127, @phrrest*eighth_note_length)
+      track.events << NoteOff.new(0, 72, 127, swingtotal(melodycount,melodycount+@phrrest-1,swinglengths)) #@phrrest*swinglengths[melodycount % 4])
       melodycount +=@phrrest
       #track.events << NoteOn.new(0, 60+g.to_i, 127, 0) 
       #track.events << NoteOff.new(0, 60+g.to_i, 127, eighth_note_length)
