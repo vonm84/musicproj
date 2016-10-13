@@ -97,7 +97,7 @@ class Midiseq
     
   end
 
-  def initialize(numcycles, bpms, span, bottom, top, swing)
+  def initialize(numcycles, bpms, span, bottom, top, swing, repeat)
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = Array.new
@@ -144,19 +144,17 @@ class Midiseq
     
     
     eighth_note_length = seq.note_to_delta('eighth')
-    
     swinglengths=[]
+    melodycount = 0
     
     for i in 0..3 do
       swinglengths[i]=4 * eighth_note_length * @@swingarr[i]/@@swingarr.inject(:+)
     end
   
-    melodycount = 0
-
     numcycles.times do
       @@tonebank.each do |f|
-        track.events << NoteOn.new(0, 60+f[0], 80, 0) << NoteOn.new(0, 60+f[1], 80, 0)
-        track.events << NoteOff.new(0, 60+f[0], 80, swinglengths[melodycount % 4]) << NoteOff.new(0, 60+f[1], 80, 0)
+        track.events << NoteOn.new(0, 60+f[0], 60, 0) << NoteOn.new(0, 60+f[1], 60, 0)
+        track.events << NoteOff.new(0, 60+f[0], 60, swinglengths[melodycount % 4]) << NoteOff.new(0, 60+f[1], 60, 0)
         melodycount +=1
       end
     end
@@ -177,9 +175,16 @@ class Midiseq
         @phrrest=Random.rand(2)+2
         wd.split("").each do |h|
           @nextp=self.nextpitch(melodycount,previouspitch)
-          #puts "[#{previouspitch}, #{@nextp}]"
-          track.events << NoteOn.new(0, @nextp, 100, 0) 
-          track.events << NoteOff.new(0, @nextp, 100, swingtotal(melodycount,melodycount+h.to_i-1,swinglengths))
+          puts "[#{previouspitch}, #{@nextp}]"
+          if repeat == false then
+            track.events << NoteOn.new(0, @nextp, 100, 0)
+            track.events << NoteOff.new(0, @nextp, 100, swingtotal(melodycount,melodycount+h.to_i-1,swinglengths))
+          else
+            if previouspitch!=@nextp then
+              track.events << NoteOn.new(0, @nextp, 100, 0)
+              track.events << NoteOff.new(0, @nextp, 100, swingtotal(melodycount,melodycount+h.to_i-1,swinglengths))
+            end
+          end
           previouspitch=@nextp
           melodycount+=h.to_i 
           

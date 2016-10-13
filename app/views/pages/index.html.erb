@@ -5,7 +5,7 @@
   <%= f.number_field(:numcycles, in: 4..256, :value =>16) %></p>
   <p><%= f.label "BPM:" %>
   <%= f.number_field(:bpm, in: 1..255,:value =>120) %></p>
-  <p> <%= f.label "Maximum leap size (12..60; use higher values for increased probabilities of larger leaps):" %>
+  <p> <%= f.label "Maximum leap size (12-60; use higher values for increased probabilities of larger leaps):" %>
   <%= f.number_field(:span, in: 12..60,:value =>12) %></p>
   
   <p><%= f.label "Swing:" %>
@@ -13,10 +13,12 @@
   : <%= f.number_field(:swing2, in: 1..7,:value =>1) %>
   : <%= f.number_field(:swing3, in: 1..7,:value =>1) %>
   : <%= f.number_field(:swing4, in: 1..7,:value =>1) %></p>
+  
+  <p> <%= f.label "Join repeated notes:" %>
+  <%= f.check_box(:repeat,:value =>false) %></p>
 
   <b> Solo instrument range (mid C = 60):</b>
   
-
   <p><%= f.label "bottom:" %>
   <%= f.number_field(:bottom, in: 1..255,:value =>55) %>
   <%= f.label "top:" %>
