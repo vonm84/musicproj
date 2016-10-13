@@ -97,11 +97,13 @@ class Midiseq
     
   end
 
-  def initialize(numcycles, bpms, span, bottom, top, swing, repeat)
+  def initialize(numcycles, bpms, span, bottom, top, swing)
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = Array.new
     @melodylength = 0
+    @events=[]
+    @eventsjoined=[]
  
     @@maxintervalspan=span
     @@rangebottom=bottom
@@ -175,47 +177,29 @@ class Midiseq
         @phrrest=Random.rand(2)+2
         wd.split("").each do |h|
           @nextp=self.nextpitch(melodycount,previouspitch)
-          puts "[#{previouspitch}, #{@nextp}]"
-          if repeat == false then
-            track.events << NoteOn.new(0, @nextp, 100, 0)
-            track.events << NoteOff.new(0, @nextp, 100, swingtotal(melodycount,melodycount+h.to_i-1,swinglengths))
-          else
-            if previouspitch!=@nextp then
-              track.events << NoteOn.new(0, @nextp, 100, 0)
-              track.events << NoteOff.new(0, @nextp, 100, swingtotal(melodycount,melodycount+h.to_i-1,swinglengths))
-            end
-          end
+          #track.events << NoteOn.new(0, @nextp, 100, 0)          
+          #track.events << NoteOff.new(0, @nextp, 100, swingtotal(melodycount,melodycount+h.to_i-1,swinglengths))
+          @events.push [1, @nextp,swingtotal(melodycount,melodycount+h.to_i-1,swinglengths)]
           previouspitch=@nextp
           melodycount+=h.to_i 
-          
-
         end
-        track.events << NoteOff.new(0, @nextp, 127, swinglengths[melodycount % 4])
+        #track.events << NoteOff.new(0, @nextp, 127, swinglengths[melodycount % 4])
+        @events.push [0, @nextp,swinglengths[melodycount % 4]]
         melodycount+=1
-        #puts "-wd-"
-        #puts "-wd- #{@melodycount} #{@melodycount.modulo(@@tonebank.length)} [#{@@tonebank[@melodycount.modulo(@@tonebank.length)][0]},#{@@tonebank[@melodycount.modulo(@@tonebank.length)][1]}]"
-
       end
-      #puts "-phr-"
-      track.events << NoteOff.new(0, 72, 127, swingtotal(melodycount,melodycount+@phrrest-1,swinglengths)) #@phrrest*swinglengths[melodycount % 4])
+      #track.events << NoteOff.new(0, @nextp, 127, swingtotal(melodycount,melodycount+@phrrest-1,swinglengths))
+      @events.push [0, @nextp,swingtotal(melodycount,melodycount+@phrrest-1,swinglengths)]
       melodycount +=@phrrest
-      #track.events << NoteOn.new(0, 60+g.to_i, 127, 0) 
-      #track.events << NoteOff.new(0, 60+g.to_i, 127, eighth_note_length)
+    end
+    
+    @events.each do |ev|
+      if ev[0]==1 then
+        track.events << NoteOn.new(0, ev[1], 100, 0)
+      end
+        track.events << NoteOff.new(0, ev[1], 100, ev[2])
     end
 
-    #numcycles.times do
-    #  @@tonebank.each do |f|
-    #    track.events << NoteOn.new(0, 60+f[0], 127, 0) << NoteOn.new(0, 60+f[1], 127, 0)
-    #    track.events << NoteOff.new(0, 60+f[0], 127, eighth_note_length) << NoteOff.new(0, 60+f[1], 127, 0)
-    #  end
-    #end
-
-    
-    # Calling recalc_times is not necessary, because that only sets the events'
-    # start times, which are not written out to the MIDI file. The delta times are
-    # what get written out.
-    
-    # track.recalc_times
+    print @events
 
     File.open('app/assets/data/tonebank_example_'+@datetime+'.mid', 'wb') { |file| seq.write(file) }
 
