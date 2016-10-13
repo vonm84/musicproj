@@ -11,11 +11,11 @@ class Midiseq
   0.014323, '12121'=> 0.0084912, '21111'=> 0.0034146, '21121'=> 
   0.0099115, '21211'=> 0.030248, '121211'=> 0.0039283, '211211'=> 
   0.0035657, '212111'=> 0.0030218}
-  @@phraseweights = {1=>0.016, 2=> 0.094, 3=> 0.23, 4=>0.31, 5=> 0.23, 6=> 0.094, 7=> 0.016}
+  @@phraseweights = {1=>0.017, 2=> 0.094, 3=> 0.23, 4=>0.31, 5=> 0.23, 6=> 0.094, 7=> 0.016}
   @@rangebottom=0
   @@rangetop=0
   @@maxintervalspan=0
-  @@swingarr=[3,2,2,3]
+  @@swingarr=[]
   
   def nested_arrays_of_pairs_to_hash(array)
   result = {}
@@ -52,16 +52,17 @@ class Midiseq
   
     u = 0.0
     ranges = Hash[weights.map{ |v, p| [u += p, v] }]
-  
-    u = rand
+    loop do
+      u = rand
+      break if ranges.find{ |p, _| p > u }!=nil
+    end
     ranges.find{ |p, _| p > u }.last
   end
   
   
+  
   def phrase
-      
     Array.new(weighted_rand @@phraseweights) {weighted_rand @@wordweights}
-    
   end
   
   def phraselength(testphrase)
@@ -71,7 +72,7 @@ class Midiseq
   def nextpitch(melcount, prevpitch)
     tonebankopt=@@tonebank[melcount.modulo(@@tonebank.length)]
     nextpitchspan=binomarray(@@maxintervalspan,prevpitch)
-    #print prevpitch
+
     optall=[]
     opt={}
     
@@ -80,7 +81,6 @@ class Midiseq
         if i.modulo(@@tonebank.length)==tb.modulo(@@tonebank.length) then optall.push i end
       end
     end
-    #hupdown=Random.rand(2)
   
     optall.each do |optsing|
           @ps = nextpitchspan.select {|k,v| k==optsing}
@@ -88,7 +88,6 @@ class Midiseq
     end
 
     opttotal = opt.values.reduce(:+)
-
     opt.each {|key,value| opt[key]=opt[key]/opttotal.to_f}
     #print opt
     
@@ -98,7 +97,7 @@ class Midiseq
     
   end
 
-  def initialize(numcycles, bpms, span, bottom, top)
+  def initialize(numcycles, bpms, span, bottom, top, swing)
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = Array.new
@@ -107,13 +106,8 @@ class Midiseq
     @@maxintervalspan=span
     @@rangebottom=bottom
     @@rangetop = top
-    #print binomarray(@@maxintervalspan,60)
-    #puts @@maxintervalspan
-    #puts @@rangebottom
-    #puts @@rangetop
-    #currentphrase = self.phrase
-    #puts phraselength(currentphrase)
-    #puts currentphrase
+    @@swingarr=swing
+
     
     loop do
       currentphrase = self.phrase
@@ -156,8 +150,6 @@ class Midiseq
     for i in 0..3 do
       swinglengths[i]=4 * eighth_note_length * @@swingarr[i]/@@swingarr.inject(:+)
     end
-    
-    print swinglengths
   
     melodycount = 0
 

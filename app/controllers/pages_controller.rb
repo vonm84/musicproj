@@ -14,7 +14,12 @@ class PagesController < ApplicationController
   end
   
   def result
-        @newmidiseq=Midiseq.new(params[:session][:numcycles].to_i,params[:session][:bpm].to_i,params[:session][:span].to_i,params[:session][:bottom].to_i,params[:session][:top].to_i)
+        @newmidiseq=Midiseq.new(params[:session][:numcycles].to_i,
+        params[:session][:bpm].to_i,
+        params[:session][:span].to_i,
+        params[:session][:bottom].to_i,
+        params[:session][:top].to_i,
+        [params[:session][:swing1].to_i,params[:session][:swing2].to_i,params[:session][:swing3].to_i,params[:session][:swing4].to_i])
         send_file 'app/assets/data/tonebank_example_'+@newmidiseq.instance_variable_get("@datetime")+'.mid'
     
   end
