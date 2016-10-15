@@ -19,7 +19,8 @@ class PagesController < ApplicationController
         params[:session][:span].to_i,
         params[:session][:bottom].to_i,
         params[:session][:top].to_i,
-        [params[:session][:swing1].to_i,params[:session][:swing2].to_i,params[:session][:swing3].to_i,params[:session][:swing4].to_i])
+        [params[:session][:swing1].to_i,params[:session][:swing2].to_i,params[:session][:swing3].to_i,params[:session][:swing4].to_i],
+        params[:session][:repeat])
         send_file 'app/assets/data/tonebank_example_'+@newmidiseq.instance_variable_get("@datetime")+'.mid'
     
   end

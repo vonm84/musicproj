@@ -97,13 +97,13 @@ class Midiseq
     
   end
 
-  def initialize(numcycles, bpms, span, bottom, top, swing)
+  def initialize(numcycles, bpms, span, bottom, top, swing, repeat)
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = Array.new
     @melodylength = 0
     @events=[]
-    @eventsjoined=[]
+    @evjoined=[]
  
     @@maxintervalspan=span
     @@rangebottom=bottom
@@ -177,30 +177,77 @@ class Midiseq
         @phrrest=Random.rand(2)+2
         wd.split("").each do |h|
           @nextp=self.nextpitch(melodycount,previouspitch)
-          #track.events << NoteOn.new(0, @nextp, 100, 0)          
-          #track.events << NoteOff.new(0, @nextp, 100, swingtotal(melodycount,melodycount+h.to_i-1,swinglengths))
           @events.push [1, @nextp,swingtotal(melodycount,melodycount+h.to_i-1,swinglengths)]
           previouspitch=@nextp
           melodycount+=h.to_i 
         end
-        #track.events << NoteOff.new(0, @nextp, 127, swinglengths[melodycount % 4])
         @events.push [0, @nextp,swinglengths[melodycount % 4]]
         melodycount+=1
       end
-      #track.events << NoteOff.new(0, @nextp, 127, swingtotal(melodycount,melodycount+@phrrest-1,swinglengths))
       @events.push [0, @nextp,swingtotal(melodycount,melodycount+@phrrest-1,swinglengths)]
       melodycount +=@phrrest
     end
+
     
+    if repeat == "1" then 
+      loop do
+      numchanges=0
+      
+      (1..@events.length-1).each do |i|
+        if (1==@events[i-1][0] && 1==@events[i][0] && @events[i-1][1]==@events[i][1]) then
+          numchanges+=1
+          @events[i-1][2]+=@events[i][2]
+          @events.delete_at i
+          i-=1
+        end
+        break if i>=@events.length
+      end
+      print "numchanges: #{numchanges}"
+      break if numchanges==0
+      end
+    end
+    #@evjoined[0] = @events[0]
+    #j=0
+    
+    #(1..@events.length-1).each do |i|
+    #for i in 1..@events.length-1
+    #  print "Before: #{@events[i][2]}"
+      #if (1==@events[i-1][0] && 1==@events[i][0] && @events[i-1][1]==@events[i][1]) then
+
+        #puts "LAST: #{@evjoined.last} " 
+        #puts "LAST[2]: #{@evjoined.last[2]} "
+        #print "Before: #{@events[i]}"
+        #@evjoined[j][2] += @events[i][2]
+        #print "After: #{@events[i]}"
+        #puts "LAST[2] after: #{@evjoined.last[2]} "
+        
+      #else
+        #j+=1
+        #@evjoined[j] = @events[i]
+
+      #end
+    #puts "After: #{@events[i][2]}"
+    #end
+  
+    puts " "
+    @events.each do |f|
+      puts "[#{f[0]},#{f[1]},#{f[2]}]"
+    end
+    puts "L:#{@events.length}"
+    #@evjoined.each do |f|
+    #  puts "[#{f[0]},#{f[1]},#{f[2]}]"
+    #end
+    
+
+      
     @events.each do |ev|
       if ev[0]==1 then
         track.events << NoteOn.new(0, ev[1], 100, 0)
       end
         track.events << NoteOff.new(0, ev[1], 100, ev[2])
     end
-
-    print @events
-
+    
+    
     File.open('app/assets/data/tonebank_example_'+@datetime+'.mid', 'wb') { |file| seq.write(file) }
 
   end
