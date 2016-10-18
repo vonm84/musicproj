@@ -4,6 +4,10 @@ class PagesController < ApplicationController
   def index
 
   end
+  
+  def testing
+      
+  end
 
   def contact
   end
@@ -11,6 +15,9 @@ class PagesController < ApplicationController
   
 
   def about
+  end
+  
+  def testresult
   end
   
   def result

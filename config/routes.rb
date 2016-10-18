@@ -11,7 +11,11 @@ Rails.application.routes.draw do
 
   get 'pages/about'
   
+  get 'pages/testing'
+  
   post 'pages/result'
+  
+  post 'pages/testresult'
   
 
   # The priority is based upon order of creation: first created -> highest priority.

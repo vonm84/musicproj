@@ -192,7 +192,7 @@ class Midiseq
     if repeat == "1" then 
       loop do
       numchanges=0
-      
+
       (1..@events.length-1).each do |i|
         if (1==@events[i-1][0] && 1==@events[i][0] && @events[i-1][1]==@events[i][1]) then
           numchanges+=1
