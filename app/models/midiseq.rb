@@ -4,14 +4,8 @@ include MIDI
   
 class Midiseq
   @@tonebank=[[0,7],[2,9],[0,4],[2,7],[2,9],[2,9],[0,4],[2,9],[0,7],[2,7],[4,9],[4,9]]
-  @@wordweights= {'2'=> 0.11782, '12'=> 0.058502, '21'=> 0.26833, '22'=> 
-  0.012812, '121'=> 0.11135, '211'=> 0.14486, '212'=> 
-  0.022996, '221'=> 0.014323, '1211'=> 0.073127, '2111'=> 
-  0.030520, '2121'=> 0.064848, '2211'=> 0.0035959, '12111'=> 
-  0.014323, '12121'=> 0.0084912, '21111'=> 0.0034146, '21121'=> 
-  0.0099115, '21211'=> 0.030248, '121211'=> 0.0039283, '211211'=> 
-  0.0035657, '212111'=> 0.0030218}
-  @@phraseweights = {1=>0.017, 2=> 0.094, 3=> 0.23, 4=>0.31, 5=> 0.23, 6=> 0.094, 7=> 0.016}
+  @@wordweights={"2"=>1178, "12"=>585, "21"=>2683, "22"=>128, "121"=>1113, "211"=>1448, "212"=>229, "221"=>143, "1211"=>731, "2111"=>305, "2121"=>648, "2211"=>35, "12111"=>143, "12121"=>84, "21111"=>34, "21121"=>99, "21211"=>302, "121211"=>39, "211211"=>35, "212111"=>30} 
+  @@phraseweights = {1=>11, 2=>40, 3=>80, 4=>100, 5=>80, 6=>40, 7=>11}
   @@rangebottom=0
   @@rangetop=0
   @@maxintervalspan=0
@@ -33,7 +27,7 @@ class Midiseq
   def swingtotal(start,stop,arr)
     total=0
     for i in start..stop
-      total+=arr[i%4]
+      total+=arr[i%3]
     end
     total
   end
@@ -47,16 +41,16 @@ class Midiseq
     nested_arrays_of_pairs_to_hash ary
   end
   
-  def weighted_rand(weights)
-    #raise 'Probabilities must sum up to 1' unless weights.values.inject(&:+) == 1.0
+
   
-    u = 0.0
-    ranges = Hash[weights.map{ |v, p| [u += p, v] }]
-    loop do
-      u = rand
-      break if ranges.find{ |p, _| p > u }!=nil
+  def weighted_rand(weighted)
+    max    = weighted.inject(0) { |sum, (item, weight)| sum + weight }
+    target = rand(1..max)
+ 
+    weighted.each do |item, weight|
+      return item if target <= weight
+      target -= weight
     end
-    ranges.find{ |p, _| p > u }.last
   end
   
   
@@ -69,10 +63,20 @@ class Midiseq
     testphrase.map{ |k| "#{k}" }.join("1").split("").map {|s| s.to_i }.inject(:+)
   end
   
-  def nextpitch(melcount, prevpitch)
+  
+  
+  def numvalstranspose(center,numvals)
+    ary = numvals.to_a
+    ary.each do |i|
+      i[0]=i[0].to_i+center-12
+      i[1]=i[1].to_i
+    end
+    nested_arrays_of_pairs_to_hash ary
+  end
+  
+  def nextpitch(melcount, prevpitch, numvals)
     tonebankopt=@@tonebank[melcount.modulo(@@tonebank.length)]
-    nextpitchspan=binomarray(@@maxintervalspan,prevpitch)
-
+    nextpitchspan=numvalstranspose(prevpitch,numvals)
     optall=[]
     opt={}
     
@@ -81,23 +85,22 @@ class Midiseq
         if i.modulo(@@tonebank.length)==tb.modulo(@@tonebank.length) then optall.push i end
       end
     end
-  
+    print " prevpitch: #{prevpitch}"
+    print " optall: #{optall}"
     optall.each do |optsing|
           @ps = nextpitchspan.select {|k,v| k==optsing}
           if @ps != {} then opt.merge! @ps end
     end
 
     opttotal = opt.values.reduce(:+)
-    opt.each {|key,value| opt[key]=opt[key]/opttotal.to_f}
-    #print opt
-    
-    #print " || "
+    #opt.each {|key,value| opt[key]=opt[key]/opttotal.to_f}
+    print "opt: #{opt}"
+    raise "Impossible melodic jump from #{prevpitch} to #{opt} at tonebank position #{melcount.modulo(@@tonebank.length)+1}" if opttotal==0
+    puts ""
     weighted_rand opt
-    #optall.sample
-    
   end
 
-  def initialize(numcycles, bpms, span, bottom, top, swing, repeat)
+  def initialize(numcycles, bpms, span, bottom, top, swing, repeat, numvals)
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = Array.new
@@ -110,7 +113,7 @@ class Midiseq
     @@rangetop = top
     @@swingarr=swing
 
-    
+    #print numvals
     loop do
       currentphrase = self.phrase
       @melodylength += phraselength(currentphrase)
@@ -149,14 +152,14 @@ class Midiseq
     swinglengths=[]
     melodycount = 0
     
-    for i in 0..3 do
-      swinglengths[i]=4 * eighth_note_length * @@swingarr[i]/@@swingarr.inject(:+)
+    for i in 0..2 do
+      swinglengths[i]=3 * eighth_note_length * @@swingarr[i]/@@swingarr.inject(:+)
     end
   
     numcycles.times do
       @@tonebank.each do |f|
         track.events << NoteOn.new(0, 60+f[0], 60, 0) << NoteOn.new(0, 60+f[1], 60, 0)
-        track.events << NoteOff.new(0, 60+f[0], 60, swinglengths[melodycount % 4]) << NoteOff.new(0, 60+f[1], 60, 0)
+        track.events << NoteOff.new(0, 60+f[0], 60, swinglengths[melodycount % 3]) << NoteOff.new(0, 60+f[1], 60, 0)
         melodycount +=1
       end
     end
@@ -176,12 +179,12 @@ class Midiseq
       phr.each do |wd|
         @phrrest=Random.rand(2)+2
         wd.split("").each do |h|
-          @nextp=self.nextpitch(melodycount,previouspitch)
+          @nextp=self.nextpitch(melodycount,previouspitch,numvals)
           @events.push [1, @nextp,swingtotal(melodycount,melodycount+h.to_i-1,swinglengths)]
           previouspitch=@nextp
           melodycount+=h.to_i 
         end
-        @events.push [0, @nextp,swinglengths[melodycount % 4]]
+        @events.push [0, @nextp,swinglengths[melodycount % 3]]
         melodycount+=1
       end
       @events.push [0, @nextp,swingtotal(melodycount,melodycount+@phrrest-1,swinglengths)]
@@ -202,7 +205,6 @@ class Midiseq
         end
         break if i>=@events.length
       end
-      print "numchanges: #{numchanges}"
       break if numchanges==0
       end
     end
@@ -229,11 +231,7 @@ class Midiseq
     #puts "After: #{@events[i][2]}"
     #end
   
-    puts " "
-    @events.each do |f|
-      puts "[#{f[0]},#{f[1]},#{f[2]}]"
-    end
-    puts "L:#{@events.length}"
+    
     #@evjoined.each do |f|
     #  puts "[#{f[0]},#{f[1]},#{f[2]}]"
     #end
