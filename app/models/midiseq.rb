@@ -6,9 +6,30 @@ class Midiseq
   @@tonebank=[[0,7],[2,9],[0,4],[2,7],[2,9],[2,9],[0,4],[2,9],[0,7],[2,7],[4,9],[4,9]]
   @@wordweights={"2"=>1178, "12"=>585, "21"=>2683, "22"=>128, "121"=>1113, "211"=>1448, "212"=>229, "221"=>143, "1211"=>731, "2111"=>305, "2121"=>648, "2211"=>35, "12111"=>143, "12121"=>84, "21111"=>34, "21121"=>99, "21211"=>302, "121211"=>39, "211211"=>35, "212111"=>30} 
   @@phraseweights = {1=>11, 2=>40, 3=>80, 4=>100, 5=>80, 6=>40, 7=>11}
-  @@rangebottom=0
-  @@rangetop=0
-  @@swingarr=[]
+
+  def lev_dist(s, t)
+    m = s.length
+    n = t.length
+    return m if n == 0
+    return n if m == 0
+    d = Array.new(m+1) {Array.new(n+1)}
+
+    (0..m).each {|i| d[i][0] = i}
+    (0..n).each {|j| d[0][j] = j}
+    (1..n).each do |j|
+      (1..m).each do |i|
+        d[i][j] = if s[i-1] == t[j-1]  # adjust index into string
+                    d[i-1][j-1]       # no operation required
+                  else
+                    [ d[i-1][j]+1,    # deletion
+                      d[i][j-1]+1,    # insertion
+                      d[i-1][j-1]+1,  # substitution
+                    ].min
+                  end
+      end
+    end
+    d[m][n]
+  end
   
   def nested_arrays_of_pairs_to_hash(array)
     result = {}
@@ -41,8 +62,30 @@ class Midiseq
     end
   end
   
-  def phrase
-    Array.new(weighted_rand @@phraseweights) {weighted_rand @@wordweights}
+  def firstphrase(initlen)
+        print "initlen:#{initlen}"
+    #Array.new(weighted_rand @@phraseweights) {weighted_rand @@wordweights}
+    Array.new(initlen.to_i) {weighted_rand @@wordweights}
+  end
+  
+  def phrasevar(prevphrase, n)
+    #print prevphrase
+    #puts n
+    #puts " "
+    n.times do
+      newlen = weighted_rand @@phraseweights.select { |key, value| (prevphrase.length-key.to_i).abs<=1 }
+      case newlen-prevphrase.length
+        when 1
+          prevphrase.insert(rand(prevphrase.length), weighted_rand(@@wordweights))
+        when 0
+          pos = rand(prevphrase.length)
+          prevphrase[pos]= weighted_rand @@wordweights.select { |key, value| lev_dist(prevphrase[pos],key).abs==1 }
+        when -1
+          prevphrase.delete_at(rand(prevphrase.length))
+      end
+    end
+    return prevphrase
+    #Array.new(weighted_rand @@phraseweights) {weighted_rand @@wordweights}
   end
   
   def phraselength(testphrase)
@@ -83,10 +126,10 @@ class Midiseq
     weighted_rand opt
   end
 
-  def initialize(numcycles, bpms, instr, bottom, top, swing, shaker, repeat, numvals)
+  def initialize(numcycles, bpms, instr, bottom, top, initlen, rhythmvar, swing, shaker, repeat, numvals)
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
-    @melody = Array.new
+    @melody = []
     @melodylength = 0
     @events=[]
     @shakerarr = shaker.values.to_a.map {|i| i.to_i}
@@ -95,16 +138,7 @@ class Midiseq
     @@rangetop = top
     @@swingarr=swing
 
-   #construct the melody
-    loop do
-      currentphrase = self.phrase
-      @melodylength += phraselength(currentphrase)
-      @melodylength += 3
-      break if @melodylength >= @@tonebank.length*numcycles
-      @melody.push(currentphrase)
-    end
-    
-    print @melody
+
 
     $LOAD_PATH[0, 0] = File.join(File.dirname(__FILE__), '..', 'lib')
     
@@ -150,7 +184,6 @@ class Midiseq
     track = Track.new(seq)
     seq.tracks << track
     track.name = 'Shaker'
-    #track.instrument = GM_PATCH_NAMES[69]
     track.events << ProgramChange.new(9, 1, 0)
   
     (0..melodycount).each do |i|
@@ -168,6 +201,20 @@ class Midiseq
     melodycount = 0
     previouspitch = 60+@@tonebank[0][0]
     
+    #construct the phrasing and rhythms
+
+    prevphrase=[]
+    loop do
+      if @melody.length==0 then currentphrase = self.firstphrase(initlen) else currentphrase=self.phrasevar(prevphrase.clone,rand(rhythmvar.to_i+1)) end
+      @melodylength += phraselength(currentphrase)
+      @melodylength += 3
+      break if @melodylength >= @@tonebank.length*numcycles
+      @melody[@melody.length] = currentphrase 
+      prevphrase=currentphrase
+    end
+
+    
+    #construct the pitches
     @melody.each do |phr|
       phr.each do |wd|
         @phrrest=Random.rand(2)+2

@@ -27,7 +27,7 @@
   <%= f.check_box(:repeat,:value =>false) %></p>
 
   <p><%= f.label "Solo instrument:" %>
-  <%= f.select :instr, options_for_select(PagesHelper::GM_PATCH_NAMES, selected: PagesHelper::GM_PATCH_NAMES[40]) %></p>
+  <%= f.select :instr, options_for_select(PagesHelper::GM_PATCH_NAMES, selected: PagesHelper::GM_PATCH_NAMES[73]) %></p>
   
   <b> Solo instrument range (mid C = 60):</b>
   
@@ -36,7 +36,10 @@
   <%= f.label "top:" %>
   <%= f.number_field(:top, in: 1..255,:value =>79) %></p>
   <b>
-
+  <p><%= f.label "First phrase length:" %>
+  <%= f.number_field(:initlen, in: 1..7,:value =>3) %></p>
+  <p><%= f.label "Maximum phrase rhythmic variation:" %>
+  <%= f.number_field(:rhythmvar, in: 0..20,:value =>3) %></p>
 
 <b> Melodic movement probability distribution:</b>
 <div style="font-size:8px">
@@ -78,7 +81,7 @@
 
 </div>
       <p> <%= f.label "Mean:" %>
-      <%= f.number_field("Binomial", in: 1..200, id: "binomial_box", :value =>70 ) %>
+      <%= f.number_field("Binomial", in: 1..200, id: "binomial_box", :value =>40 ) %>
       <%= f.button "Update", :type => "button",:onclick => "update()" %></p> 
 
 

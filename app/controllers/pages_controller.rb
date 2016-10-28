@@ -26,6 +26,8 @@ class PagesController < ApplicationController
         params[:session][:instr],
         params[:session][:bottom].to_i,
         params[:session][:top].to_i,
+        params[:session][:initlen].to_i,
+        params[:session][:rhythmvar].to_i,
         [params[:session][:swing1].to_i,params[:session][:swing2].to_i,params[:session][:swing3].to_i],
         params[:session][:shaker],
         params[:session][:repeat],
