@@ -63,7 +63,7 @@ class Midiseq
   end
   
   def firstphrase(initlen)
-        print "initlen:#{initlen}"
+        #print "initlen:#{initlen}"
     #Array.new(weighted_rand @@phraseweights) {weighted_rand @@wordweights}
     Array.new(initlen.to_i) {weighted_rand @@wordweights}
   end
@@ -209,7 +209,9 @@ class Midiseq
       @melodylength += phraselength(currentphrase)
       @melodylength += 3
       break if @melodylength >= @@tonebank.length*numcycles
-      @melody[@melody.length] = currentphrase 
+      @melody[@melody.length] = currentphrase
+      print currentphrase
+      puts ""
       prevphrase=currentphrase
     end
 

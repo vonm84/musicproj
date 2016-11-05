@@ -1,12 +1,13 @@
+<div style="margin-left:20px">
 <p id="notice"><%= notice %></p>
 
-<h1>Listing Articles</h1>
+<h1>Current Tone Banks</h1>
 
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>Title</th>
-      <th>Body</th>
+      <th>Name</th>
+      <th>Notes</th>
       <th colspan="3"></th>
     </tr>
   </thead>
@@ -16,7 +17,7 @@
       <tr>
         <td><%= article.title %></td>
         <td><%= article.body %></td>
-        <td><%= link_to 'Show', article %></td>
+        <td><%#= link_to 'Show', article %></td>
         <td><%= link_to 'Edit', edit_article_path(article) %></td>
         <td><%= link_to 'Destroy', article, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
@@ -26,4 +27,5 @@
 
 <br>
 
-<%= link_to 'New Article', new_article_path %>
+<%= link_to 'New Tone Bank', new_article_path %>
+</div>

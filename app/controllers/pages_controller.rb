@@ -2,7 +2,7 @@ class PagesController < ApplicationController
 
 
   def index
-
+    @articles=Article.all
   end
   
   def testing
@@ -21,7 +21,8 @@ class PagesController < ApplicationController
   end
   
   def result
-        @newmidiseq=Midiseq.new(params[:session][:numcycles].to_i,
+        @newmidiseq=Midiseq.new(params[:session][:tonebank],
+        params[:session][:numcycles].to_i,
         params[:session][:bpm].to_i,
         params[:session][:instr],
         params[:session][:bottom].to_i,

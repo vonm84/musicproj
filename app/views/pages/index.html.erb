@@ -5,7 +5,11 @@
     <!-- h1>Index </h1> --!>
 <div style="margin-left:20px">
 
+
 <%= form_for :session, url: pages_result_path, :html => { :method => 'POST' } do |f| %>
+  <p><%= f.label "Tone Bank (in progress):" %>
+  <%#= f.input(:tonebank) %>
+  <%= f.select("title", @articles.collect {|r| r.title }) %></p>
   <p><%= f.label "Number of Cycles:" %>
   <%= f.number_field(:numcycles, in: 4..256, :value =>16) %></p>
   <p><%= f.label "BPM:" %>
@@ -41,54 +45,48 @@
   <p><%= f.label "Maximum phrase rhythmic variation:" %>
   <%= f.number_field(:rhythmvar, in: 0..20,:value =>3) %></p>
 
-<b> Melodic movement probability distribution:</b>
-<div style="font-size:8px">
+  <b> Melodic movement probability distribution:</b>
+  <div style="font-size:8px">
 
 
 
-<table frame = "box">
-  <tr>
-    <% (-12..12).each do |i| %>
-    <%= content_tag :td, align: "center" do %>
-      <% "#{i}" %>
-    <% end %>
-    <% end %>
-  </tr>
-   <tr>
-    <% (0..24).each do |i| %>
+  <table frame = "box">
+    <tr>
+      <% (-12..12).each do |i| %>
       <%= content_tag :td, align: "center" do %>
-        <%#= f.label "label_#{i}", id: "cycles_label_#{i}" %>
-        <%= f.number_field("numvals[#{i}]", in: 0..100, width: "50%", id: "vals_box_#{i}", :value =>100, :onchange => "changerect(#{i})" ) %>
+        <% "#{i}" %>
       <% end %>
-    <% end %>
-  </tr>
-  <tr>
-    <% (0..24).each do |i| %>
-      <%= content_tag :td, align: "center", id: "distrib_#{i}" do %>
       <% end %>
-    <% end %>
-  </tr>
-  <tr>
-    <% (0..24).each do |i| %>
-      <%= content_tag :td, align: "center", id: "perc_#{i}" do %>
-      0
+    </tr>
+     <tr>
+      <% (0..24).each do |i| %>
+        <%= content_tag :td, align: "center" do %>
+          <%#= f.label "label_#{i}", id: "cycles_label_#{i}" %>
+          <%= f.number_field("numvals[#{i}]", in: 0..100, id: "vals_box_#{i}", :value =>100, :onchange => "changerect(#{i})" ) %>
+        <% end %>
       <% end %>
-    <% end %>
-  </tr>
+    </tr>
+    <tr>
+      <% (0..24).each do |i| %>
+        <%= content_tag :td, align: "center", id: "distrib_#{i}" do %>
+        <% end %>
+      <% end %>
+    </tr>
+    <tr>
+      <% (0..24).each do |i| %>
+        <%= content_tag :td, align: "center", id: "perc_#{i}" do %>
+        0
+        <% end %>
+      <% end %>
+    </tr>
 
 
-</table>
+  </table>
 
 </div>
       <p> <%= f.label "Mean:" %>
       <%= f.number_field("Binomial", in: 1..200, id: "binomial_box", :value =>40 ) %>
       <%= f.button "Update", :type => "button",:onclick => "update()" %></p> 
-
-
-
-
-  
-  
 
   <p><%= f.submit "Generate", :type => "button",:onclick => "document.forms[0].submit()" %></p> 
   
