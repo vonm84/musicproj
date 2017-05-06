@@ -1,54 +1,31 @@
+<!doctype html>
 
-<body onload="update()">
-<% javascript_include_tag "distribbox" %>
+<html>
+  	<%= stylesheet_link_tag "Piano-Keyboard" %>
+		<%= javascript_include_tag "Piano-Keyboard", defer: true %>
+		<%= javascript_include_tag "demo", defer: true %>
+	<head>
+		<meta charset="utf8">
+		<title>piano keyboard demo</title>
 
-<div style="margin-left:20px">
-<b> Melodic movement probability distribution:</b>
-<div style="font-size:8px">
-<%= form_for :session, url: pages_testresult_path, :html => { :method => 'POST' } do |f| %>
+	</head>
+	
+	<body>
+		<h1>piano keyboard demo</h1>
+		
+		<%= form_for :session, url: pages_testresult_path, :html => { :method => 'POST' } do |f| %>
+		
+		
+		<p>
+			<openmusic-piano-keyboard id="full" octaves="1"></openmusic-piano-keyboard>
+			<!--span id="fullEvents"></span-->
+			<%= f.text_field :body, label: "Pitches", id: "fullEvents" %>
+		</p>
+		<p> <%= f.button "Next chord", :type => "button",:onclick => "nextchord()" %></p>
+    <p>  <%= f.button "Clear", :type => "button",:onclick => "clearbank()" %></p> 
 
-
-<table frame = "box">
-  <tr>
-    <% (-12..12).each do |i| %>
-    <%= content_tag :td, align: "center" do %>
-      <% "#{i}" %>
-    <% end %>
-    <% end %>
-  </tr>
-   <tr>
-    <% (0..24).each do |i| %>
-      <%= content_tag :td, align: "center" do %>
-        <%#= f.label "label_#{i}", id: "cycles_label_#{i}" %>
-        <%= f.number_field("numvals[#{i}]", in: 0..100, width: "50%", id: "vals_box_#{i}", :value =>100, :onchange => "changerect(#{i})" ) %>
-      <% end %>
-    <% end %>
-  </tr>
-  <tr>
-    <% (0..24).each do |i| %>
-      <%= content_tag :td, align: "center", id: "distrib_#{i}" do %>
-      <% end %>
-    <% end %>
-  </tr>
-  <tr>
-    <% (0..24).each do |i| %>
-      <%= content_tag :td, align: "center", id: "perc_#{i}" do %>
-      0
-      <% end %>
-    <% end %>
-  </tr>
-
-
-</table>
-
-</div>
-      <p> <%= f.label "Mean:" %>
-      <%= f.number_field("Binomial", in: 1..200, id: "binomial_box", :value =>70 ) %>
-      <%= f.button "Update", :type => "button",:onclick => "update()" %></p> 
-
-<p><%= f.submit "Generate" %></p> 
-<% end %>
-
-</div>
-</body>
+  <p><%= f.submit "Generate", :type => "button",:onclick => "document.forms[0].submit()" %></p> 
+		<% end %>
+	</body>
+</html>
 

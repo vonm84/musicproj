@@ -3,7 +3,8 @@ require 'midilib/consts'
 include MIDI
   
 class Midiseq
-  @@tonebank=[[0,7],[2,9],[0,4],[2,7],[2,9],[2,9],[0,4],[2,9],[0,7],[2,7],[4,9],[4,9]]
+  @@tonebank=[]
+  #@@tonebank=[[0,7],[2,9],[0,4],[2,7],[2,9],[2,9],[0,4],[2,9],[0,7],[2,7],[4,9],[4,9]]
   @@wordweights={"2"=>1178, "12"=>585, "21"=>2683, "22"=>128, "121"=>1113, "211"=>1448, "212"=>229, "221"=>143, "1211"=>731, "2111"=>305, "2121"=>648, "2211"=>35, "12111"=>143, "12121"=>84, "21111"=>34, "21121"=>99, "21211"=>302, "121211"=>39, "211211"=>35, "212111"=>30} 
   @@phraseweights = {1=>11, 2=>40, 3=>80, 4=>100, 5=>80, 6=>40, 7=>11}
 
@@ -109,11 +110,15 @@ class Midiseq
     
     for i in @@rangebottom..@@rangetop
       tonebankopt.each do |tb|
-        if i.modulo(@@tonebank.length)==tb.modulo(@@tonebank.length) then optall.push i end
+        #if i.modulo(@@tonebank.length)==tb.modulo(@@tonebank.length) then optall.push i end
+        if i.modulo(12)==tb.to_i then optall.push i end
       end
     end
-    #print " prevpitch: #{prevpitch}"
-    #print " optall: #{optall}"
+    print " melcount: #{melcount}"
+    print " prevpitch: #{prevpitch}"
+    print " tonebankopt: #{tonebankopt}"
+    print " optall: #{optall}"
+    puts ""
     optall.each do |optsing|
           @ps = nextpitchspan.select {|k,v| k==optsing}
           if @ps != {} then opt.merge! @ps end
@@ -126,14 +131,16 @@ class Midiseq
     weighted_rand opt
   end
 
-  def initialize(numcycles, bpms, instr, bottom, top, initlen, rhythmvar, swing, shaker, repeat, numvals)
+  def initialize(tonebanktitle, numcycles, bpms, instr, bottom, top, initlen, minrhythmvar, maxrhythmvar, swing, shaker, repeat, numvals)
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = []
     @melodylength = 0
     @events=[]
     @shakerarr = shaker.values.to_a.map {|i| i.to_i}
-
+    @@tonebank = eval(Article.all.find_by(title: tonebanktitle).body)
+    
+    
     @@rangebottom=bottom
     @@rangetop = top
     @@swingarr=swing
@@ -174,8 +181,21 @@ class Midiseq
   
     numcycles.times do
       @@tonebank.each do |f|
-        track.events << NoteOn.new(1, 60+f[0], 80, 0) << NoteOn.new(1, 60+f[1], 80, 0)
-        track.events << NoteOff.new(1, 60+f[0], 80, swinglengths[melodycount % 3]) << NoteOff.new(1, 60+f[1], 80, 0)
+        #f.each do |g|
+          #track.events << NoteOn.new(1, 60+g, 80, 0)
+        #end
+        #f.each do |g|
+          #NoteOff.new(1, 60+g, 80, swinglengths[melodycount % 3])
+        #end
+        (0..(f.length-1) ).each do |g|
+          track.events.push NoteOn.new(1, 60+f[g], 80, 0) 
+          #track.events.push  NoteOn.new(1, 60+f[1], 80, 0)
+        end
+        (0..(f.length-1) ).each do |g|
+          if g == 0 then track.events.push NoteOff.new(1, 60+f[0], 80, swinglengths[melodycount % 3])
+          else track.events.push NoteOff.new(1, 60+f[g], 80, 0)
+          end
+        end
         melodycount +=1
       end
     end
@@ -199,13 +219,12 @@ class Midiseq
     #track.events << Controller.new(0, CC_VOLUME, 127)
     
     melodycount = 0
-    previouspitch = 60+@@tonebank[0][0]
-    
+    previouspitch = (@@rangebottom+@@rangetop)/2.to_i#@@rangebottom+@@tonebank[0][0]
     #construct the phrasing and rhythms
 
     prevphrase=[]
     loop do
-      if @melody.length==0 then currentphrase = self.firstphrase(initlen) else currentphrase=self.phrasevar(prevphrase.clone,rand(rhythmvar.to_i+1)) end
+      if @melody.length==0 then currentphrase = self.firstphrase(initlen) else currentphrase=self.phrasevar(prevphrase.clone,(minrhythmvar.to_i..maxrhythmvar.to_i).to_a.sample) end
       @melodylength += phraselength(currentphrase)
       @melodylength += 3
       break if @melodylength >= @@tonebank.length*numcycles
@@ -250,7 +269,8 @@ class Midiseq
       break if numchanges==0
       end
     end
-      
+    
+    print "events: #{@events}"
     @events.each do |ev|
       if ev[0]==1 then
         track.events << NoteOn.new(0, ev[1], 100, 0)

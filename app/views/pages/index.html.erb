@@ -7,9 +7,9 @@
 
 
 <%= form_for :session, url: pages_result_path, :html => { :method => 'POST' } do |f| %>
-  <p><%= f.label "Tone Bank (in progress):" %>
+  <p><%= f.label "Tone Bank:" %>
   <%#= f.input(:tonebank) %>
-  <%= f.select("title", @articles.collect {|r| r.title }) %></p>
+  <%= f.select(:tonebank, @articles.collect {|r| r.title }) %></p>
   <p><%= f.label "Number of Cycles:" %>
   <%= f.number_field(:numcycles, in: 4..256, :value =>16) %></p>
   <p><%= f.label "BPM:" %>
@@ -42,8 +42,10 @@
   <b>
   <p><%= f.label "First phrase length:" %>
   <%= f.number_field(:initlen, in: 1..7,:value =>3) %></p>
+    <p><%= f.label "Minimum phrase rhythmic variation:" %>
+  <%= f.number_field(:minrhythmvar, in: 0..20,:value =>1) %></p>
   <p><%= f.label "Maximum phrase rhythmic variation:" %>
-  <%= f.number_field(:rhythmvar, in: 0..20,:value =>3) %></p>
+  <%= f.number_field(:maxrhythmvar, in: 0..20,:value =>1) %></p>
 
   <b> Melodic movement probability distribution:</b>
   <div style="font-size:8px">

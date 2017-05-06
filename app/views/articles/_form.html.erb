@@ -1,12 +1,23 @@
-<%= simple_form_for(@article) do |f| %>
-  <%= f.error_notification %>
+  	<%= stylesheet_link_tag "Piano-Keyboard" %>
+		<%= javascript_include_tag "Piano-Keyboard", defer: true %>
+		<%= javascript_include_tag "demo", defer: true %>
 
-  <!-- div class="form-inputs" -->
-    <%= f.input :title, label: "Name" %>
-    <%= f.input :body, label: "Notes" %>
-  <!-- /div -->
+<%= form_for(@article) do |f| %>
+  <%#= f.error_notification %>
 
-  <!-- div class="form-actions" -->
-    <%= f.button :submit, "Create Tone Bank" %>
-  <!-- /div -->
+  <div class="form-inputs">
+     <p><%= f.label "Name:" %>
+   <%= f.text_field :title, label: "Name" %></p>
+   <br>
+    <p><%= f.label "Pitches:" %>
+    <%= f.text_area :body, label: "Pitches", id: "fullEvents", style: "resize:none" %></p>
+    <openmusic-piano-keyboard id="full" octaves="1"></openmusic-piano-keyboard>
+  </div>
+  <br>
+  <div class="form-actions">
+  <p> <%= f.button "Next chord", :type => "button",:onclick => "nextchord()" %>
+ <%= f.button "Clear", :type => "button",:onclick => "clearbank()" %></p> 
+ <br>
+    <%= f.button  "Create Tone Bank", :type => "button",:onclick => "banksubmit()" %>
+  </div>
 <% end %>
