@@ -7,23 +7,48 @@
 
 
 <%= form_for :session, url: pages_result_path, :html => { :method => 'POST' } do |f| %>
-  <p><%= f.label "Tone Bank:" %>
-  <%#= f.input(:tonebank) %>
+
+
+  <p><%= f.label "Tone bank:" %>
   <%= f.select(:tonebank, @articles.collect {|r| r.title }) %></p>
-  <p><%= f.label "Number of Cycles:" %>
+  <p><%= f.label "Tone bank instrument:" %>
+  <%#= f.input(:tonebank) %>
+  <%= f.select :tonebankinstr, options_for_select(PagesHelper::GM_PATCH_NAMES, selected: PagesHelper::GM_PATCH_NAMES[108]) %></p>
+  <p><%= f.label "Number of tone bank cycles:" %>
   <%= f.number_field(:numcycles, in: 4..256, :value =>16) %></p>
-  <p><%= f.label "BPM:" %>
+    <p><%= f.label "BPM:" %>
   <%= f.number_field(:bpm, in: 1..255,:value =>120) %></p>
   
-  <p><%= f.label "Swing:" %>
-  <%= f.number_field(:swing1, in: 1..7,:value =>1) %> 
-  : <%= f.number_field(:swing2, in: 1..7,:value =>1) %>
-  : <%= f.number_field(:swing3, in: 1..7,:value =>1) %></p>
+    <p><%= f.label "Beats:" %>
+  <%= f.number_field(:tsnum, in: 1..20,:value =>4) %>
+   <p> <%= f.label "Divisions:" %>
+  <%= f.select :divs, options_for_select([3,4,5],selected:3)  %></p>
+  
+      <p><%= f.label "Swing:" %>
+    <% (0..4).each do |i| %>
+        <% if i <= 2 %>
+          <%= f.label(":", id:"colon[#{i}]") if i >0 %>
+          <%= f.number_field("swing[#{i}]",in: 1..7,:value =>1) %>
+          
+        <% else %>
+          <%= f.label(":", id:"colon[#{i}]",:hidden=>true) if i >0 %>
+          <%= f.number_field("swing[#{i}]",in: 1..7,:value =>1,:hidden=>true) %>
+        <% end %>
+    <% end %>
+  </p>
+  </p>
   
     <p><%= f.label "Shaker:" %>
-    <% (0..11).each do |i| %>
+    <% (0..99).each do |i| %>
+      <% if i <= 11 %>
         <%= f.check_box("shaker[#{i}]",:checked => (i%3==0?true:false)) %>
-        <%= raw("&nbsp") if i % 3 == 2 && i<11 %>
+        <%= f.label("\u00a0", id:"space3[#{i}]") if i % 3 == 2 %>          
+      <% else %>
+        <%= f.check_box("shaker[#{i}]",:checked => (i%3==0?true:false),:hidden=>true) %>
+        <%= f.label("\u00a0", id:"space3[#{i}]",:hidden=>true) if i % 3 == 2 %>   
+      <% end %>
+      <%= f.label("\u00a0", id:"space4[#{i}]",:hidden=>true) if i % 4 == 3 %>
+      <%= f.label("\u00a0", id:"space5[#{i}]",:hidden=>true) if i % 5 == 4 %>
     <% end %>
   </p>
   
@@ -94,6 +119,52 @@
   
  
 <% end %>
+
+
+
+
 </div>
+
+<script type="text/javascript">
+
+$(function(){
+    
+    $("#session_divs").on("change", function(){
+      for(i=0; i<99; i++){
+        
+        if (i < $("#session_divs").val() * $("#session_tsnum").val() ){
+          $("#session_shaker\\["+i+"\\]").show();
+          if($("#session_divs").val()=="3") {$("#space3\\["+i+"\\]").show();$("#space5\\["+i+"\\]").hide();$("#space4\\["+i+"\\]").hide()}
+          if($("#session_divs").val()=="4") {$("#space3\\["+i+"\\]").hide();$("#space5\\["+i+"\\]").hide();$("#space4\\["+i+"\\]").show()}
+          if($("#session_divs").val()=="5") {$("#space3\\["+i+"\\]").hide();$("#space5\\["+i+"\\]").show();$("#space4\\["+i+"\\]").hide()}
+          if( i % $("#session_divs").val()==0) {
+            $("#session_shaker\\["+i+"\\]").prop('checked',true);
+          } else {
+            $("#session_shaker\\["+i+"\\]").prop('checked',false);
+          }  
+        }
+        else {
+          $("#session_shaker\\["+i+"\\]").hide();
+        }
+      
+      }
+
+      for (i = 0; i < 5; i++) {
+        if(i<$("#session_divs").val()){
+          $("#session_swing\\["+i+"\\]").show();
+          $("#colon\\["+i+"\\]").show();
+        }
+        else {
+          $("#session_swing\\["+i+"\\]").hide();
+          $("#colon\\["+i+"\\]").hide();
+        }
+        
+      }
+      
+});
+});
+
+
+</script>
 
 </body>

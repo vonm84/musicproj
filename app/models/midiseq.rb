@@ -45,10 +45,10 @@ class Midiseq
     result
   end
   
-  def swingtotal(start,stop,arr)
+  def swingtotal(start,stop,arr,divs)
     total=0
     for i in start..stop
-      total+=arr[i%3]
+      total+=arr[i%divs]
     end
     total
   end
@@ -131,19 +131,19 @@ class Midiseq
     weighted_rand opt
   end
 
-  def initialize(tonebanktitle, numcycles, bpms, instr, bottom, top, initlen, minrhythmvar, maxrhythmvar, swing, shaker, repeat, numvals)
+  def initialize(tonebanktitle, numcycles, bpms, instr, bottom, top, initlen, minrhythmvar, maxrhythmvar, swing, shaker, repeat, numvals, tsnum, divs, tonebankinstr)
 
     @datetime = Time.now.strftime('%Y-%m-%d_%H-%M-%S')
     @melody = []
     @melodylength = 0
     @events=[]
-    @shakerarr = shaker.values.to_a.map {|i| i.to_i}
+    @shakerarr = shaker.values.to_a.map(&:to_i)[0..(tsnum*divs)-1]
     @@tonebank = eval(Article.all.find_by(title: tonebanktitle).body)
     
     
     @@rangebottom=bottom
     @@rangetop = top
-    @@swingarr=swing
+    @@swingarr=swing.values.to_a.map(&:to_i)[0..divs-1]
 
 
 
@@ -156,27 +156,27 @@ class Midiseq
     track = Track.new(seq)
     seq.tracks << track
     track.events << Tempo.new(Tempo.bpm_to_mpq(bpms).to_i)
-    track.events << TimeSig.new(6,3,24,8,0)
-    track.events << MetaEvent.new(META_SEQ_NAME, 'Tonebank Example')
+    track.events << TimeSig.new(tsnum,2,24,8,0)
+    track.events << MetaEvent.new(META_SEQ_NAME, 'Tone bank example')
     
     
     # Create a track to hold the notes. Add it to the sequence.
     track = Track.new(seq)
     seq.tracks << track
-    track.name = 'Tonebank'
-    track.instrument = GM_PATCH_NAMES[108]
-    track.events << ProgramChange.new(0, 108, 0)
+    track.name = 'Tone bank'
+    track.instrument = tonebankinstr 
+    track.events << ProgramChange.new(0, GM_PATCH_NAMES.index(tonebankinstr), 0)
     
     
-    eighth_note_length = seq.note_to_delta('eighth')
+    eighth_note_length =  2* seq.note_to_delta('eighth') / divs
     swinglengths=[]
     melodycount = 0
     
-    for i in 0..2 do
-      swinglengths[i]=3 * eighth_note_length * @@swingarr[i]/@@swingarr.inject(:+)
+    for i in 0..divs-1 do
+      swinglengths[i]=divs * eighth_note_length * @@swingarr[i]/@@swingarr.inject(:+)
     end
     
-    swinglengths[-1]+=(3 * eighth_note_length - swinglengths.inject(:+))
+    swinglengths[-1]+=(divs * eighth_note_length - swinglengths.inject(:+))
     
   
     numcycles.times do
@@ -192,7 +192,7 @@ class Midiseq
           #track.events.push  NoteOn.new(1, 60+f[1], 80, 0)
         end
         (0..(f.length-1) ).each do |g|
-          if g == 0 then track.events.push NoteOff.new(1, 60+f[0], 80, swinglengths[melodycount % 3])
+          if g == 0 then track.events.push NoteOff.new(1, 60+f[0], 80, swinglengths[melodycount % divs])
           else track.events.push NoteOff.new(1, 60+f[g], 80, 0)
           end
         end
@@ -208,7 +208,7 @@ class Midiseq
   
     (0..melodycount).each do |i|
       track.events << NoteOn.new(9, 69, 80, 0) if @shakerarr[i % @shakerarr.length] == 1
-      track.events << NoteOff.new(9, 69, 80, swinglengths[i % 3])
+      track.events << NoteOff.new(9, 69, 80, swinglengths[i % divs])
     end
     
     track = Track.new(seq)
@@ -241,14 +241,14 @@ class Midiseq
         @phrrest=Random.rand(2)+2
         wd.split("").each do |h|
           @nextp=self.nextpitch(melodycount,previouspitch,numvals)
-          @events.push [1, @nextp,swingtotal(melodycount,melodycount+h.to_i-1,swinglengths)]
+          @events.push [1, @nextp,swingtotal(melodycount,melodycount+h.to_i-1,swinglengths,divs)]
           previouspitch=@nextp
           melodycount+=h.to_i 
         end
-        @events.push [0, @nextp,swinglengths[melodycount % 3]]
+        @events.push [0, @nextp,swinglengths[melodycount % divs]]
         melodycount+=1
       end
-      @events.push [0, @nextp,swingtotal(melodycount,melodycount+@phrrest-1,swinglengths)]
+      @events.push [0, @nextp,swingtotal(melodycount,melodycount+@phrrest-1,swinglengths,divs)]
       melodycount +=@phrrest
     end
 

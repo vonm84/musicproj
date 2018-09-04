@@ -30,10 +30,13 @@ class PagesController < ApplicationController
         params[:session][:initlen].to_i,
         params[:session][:minrhythmvar].to_i,
         params[:session][:maxrhythmvar].to_i,
-        [params[:session][:swing1].to_i,params[:session][:swing2].to_i,params[:session][:swing3].to_i],
+        params[:session][:swing],
         params[:session][:shaker],
         params[:session][:repeat],
-        params[:session][:numvals]
+        params[:session][:numvals],
+        params[:session][:tsnum].to_i,
+        params[:session][:divs].to_i,
+        params[:session][:tonebankinstr]
         )
         send_file 'app/assets/data/tonebank_example_'+@newmidiseq.instance_variable_get("@datetime")+'.mid'
     
