@@ -140,6 +140,7 @@ $(function(){
           if( i % $("#session_divs").val()==0) {
             $("#session_shaker\\["+i+"\\]").prop('checked',true);
           } else {
+
             $("#session_shaker\\["+i+"\\]").prop('checked',false);
           }  
         }
@@ -162,6 +163,42 @@ $(function(){
       }
       
 });
+
+ $("#session_tsnum").on("change", function(){
+      for(i=0; i<99; i++){
+        
+        if (i < $("#session_divs").val() * $("#session_tsnum").val() ){
+          $("#session_shaker\\["+i+"\\]").show();
+          if($("#session_divs").val()=="3") {$("#space3\\["+i+"\\]").show();$("#space5\\["+i+"\\]").hide();$("#space4\\["+i+"\\]").hide()}
+          if($("#session_divs").val()=="4") {$("#space3\\["+i+"\\]").hide();$("#space5\\["+i+"\\]").hide();$("#space4\\["+i+"\\]").show()}
+          if($("#session_divs").val()=="5") {$("#space3\\["+i+"\\]").hide();$("#space5\\["+i+"\\]").show();$("#space4\\["+i+"\\]").hide()}
+          if( i % $("#session_divs").val()==0) {
+            $("#session_shaker\\["+i+"\\]").prop('checked',true);
+          } else {
+
+            $("#session_shaker\\["+i+"\\]").prop('checked',false);
+          }  
+        }
+        else {
+          $("#session_shaker\\["+i+"\\]").hide();
+        }
+      
+      }
+
+      for (i = 0; i < 5; i++) {
+        if(i<$("#session_divs").val()){
+          $("#session_swing\\["+i+"\\]").show();
+          $("#colon\\["+i+"\\]").show();
+        }
+        else {
+          $("#session_swing\\["+i+"\\]").hide();
+          $("#colon\\["+i+"\\]").hide();
+        }
+        
+      }
+      
+});
+
 });
 
 
